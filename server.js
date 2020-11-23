@@ -26,11 +26,28 @@ const sessionObject = {
 
 app.use(session(sessionObject));
 
+// initialize passport and run thru middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// using flash to send temporary messages to user
+app.use(flash());
+
+// msgs that will be accessible to every view
+app.use((req, res, next) => {
+  // before every route, attach user to res.local
+  res.locals.alerts = req.flash();
+  res.locals.currentUser = req.user;
+  next();
+})
+
 app.get('/', (req, res) => {
-  res.render('index');
+  console.log(res.locals.alerts);
+  res.render('index', { alerts: res.locals.alerts });
 });
 
-app.get('/profile', (req, res) => {
+// check to see if user is logged in, if so, render profile page
+app.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 
